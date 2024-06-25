@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conversor de Moeda</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      width: 320px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    input[type="text"] {
+      width: calc(100% - 20px);
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #exchange-rate {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Conversor de Moeda USD</h1>
+    <label for="currency-input">Digite o código da moeda:</label>
+    <input type="text" id="currency-input" placeholder="Ex: EUR, GBP, JPY">
+    <br>
+    <button onclick="fetchExchangeRate()">Converter</button>
+    <div id="exchange-rate"></div> <!-- Aqui será exibida a taxa de câmbio -->
+  </div>
+
+  <script>
+    // Função para buscar e exibir a taxa de câmbio
+    function fetchExchangeRate() {
+      const currencyCode = document.getElementById('currency-input').value.toUpperCase();
+      const url = `https://v6.exchangerate-api.com/v6/ab7537453840f05e4507fe1b/latest/USD`;
+
+      fetch(url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Erro ao carregar os dados da API.');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log(data); // Exibe os dados recebidos no console para verificação
+
+          // Verifica se 'conversion_rates' está presente nos dados recebidos
+          if (!data.conversion_rates) {
+            throw new Error('Dados de taxa de câmbio não encontrados.');
+          }
+
+          const exchangeRates = data.conversion_rates; // Obtém as taxas de conversão
+
+          // Verifica se o código da moeda digitado está disponível nas taxas de conversão
+          if (!exchangeRates.hasOwnProperty(currencyCode)) {
+            throw new Error(`Moeda '${currencyCode}' não encontrada.`);
+          }
+
+          const rate = exchangeRates[currencyCode]; // Obtém a taxa de câmbio para a moeda especificada
+
+          // Atualiza o conteúdo do elemento com id 'exchange-rate'
+          document.getElementById('exchange-rate').textContent = `1 USD = ${rate} ${currencyCode}`;
+        })
+        .catch(error => {
+          console.error('Erro ao carregar dados da API:', error);
+          // Exibe uma mensagem de erro na div de taxa de câmbio em caso de erro
+          document.getElementById('exchange-rate').textContent = `Moeda '${currencyCode}' não encontrada.`;
+        });
+    }
+  </script>
+</body>
+</html>
